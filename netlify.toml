@@ -1,2 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
 [build.environment]
   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_SUPABASE_URL"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[[redirects]]
+  from = "/*"
+  status = 200
+  to = "/index.html"

@@ -31,11 +31,13 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleLogin = async () => {
+const handleGoogleLogin = async () => {
     setLoading(true)
     setError(null)
 
-    const redirectTo = 'http://localhost:3000/auth/callback'
+    // מזהה דינמית את הדומיין הנוכחי (נטליפיי או לוקאלחוסט)
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://predict-sports.netlify.app'
+    const redirectTo = `${origin}/auth/callback`
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

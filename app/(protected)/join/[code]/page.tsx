@@ -8,7 +8,6 @@ interface JoinPageProps {
 }
 
 export default async function JoinLeaguePage({ params }: JoinPageProps) {
-  // בגרסאות Next.js החדשות חייבים לעשות await ל-params
   const resolvedParams = await params
   const inviteCode = resolvedParams.code.toUpperCase()
   
@@ -32,7 +31,7 @@ export default async function JoinLeaguePage({ params }: JoinPageProps) {
     notFound()
   }
 
-  // 2. Fetch current user (משתמש כבר מחובר כי הדף נמצא תחת קבוצת protected)
+  // 2. Fetch current user
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     redirect('/login')
@@ -56,7 +55,7 @@ export default async function JoinLeaguePage({ params }: JoinPageProps) {
     .select('*', { count: 'exact', head: true })
     .eq('league_id', league.id)
 
-  // Server Action להצטרפות לליגה
+  // Server Action
   const handleJoin = async () => {
     'use server'
     const joinSupabase = await createClient()

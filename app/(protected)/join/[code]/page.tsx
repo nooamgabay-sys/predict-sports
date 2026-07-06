@@ -1,14 +1,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
-import { Trophy, Users, CheckCircle, ArrowRight, Shield } from 'lucide-react'
+import { Trophy, Users, CheckCircle, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 interface JoinPageProps {
-  params: { code: string }
+  params: Promise<{ code: string }>
 }
 
 export default async function JoinLeaguePage({ params }: JoinPageProps) {
-  const inviteCode = params.code.toUpperCase()
+  // בגרסאות Next.js החדשות חייבים לעשות await ל-params
+  const resolvedParams = await params
+  const inviteCode = resolvedParams.code.toUpperCase()
+  
   const supabase = await createClient()
 
   // 1. Fetch the league details
@@ -29,37 +32,10 @@ export default async function JoinLeaguePage({ params }: JoinPageProps) {
     notFound()
   }
 
-  // 2. Check auth
+  // 2. Fetch current user (משתמש כבר מחובר כי הדף נמצא תחת קבוצת protected)
   const { data: { user } } = await supabase.auth.getUser()
-
   if (!user) {
-    // Redirect to signup or login with the invite code
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-surface-glow">
-        <div className="glass-card p-8 max-w-md w-full text-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center mx-auto">
-            <Trophy className="w-8 h-8 text-indigo-400" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-white mb-2">You&apos;re Invited!</h1>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              You have been invited to join <strong className="text-white">{league.name}</strong>.
-              Create an account or sign in to enter the prediction battle.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <Link href={`/signup?redirectTo=/join/${inviteCode}`} className="btn-primary w-full py-3">
-              Sign Up to Join
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link href={`/login?redirectTo=/join/${inviteCode}`} className="btn-secondary w-full py-3">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+    redirect('/login')
   }
 
   // 3. Check if already a member
@@ -71,7 +47,6 @@ export default async function JoinLeaguePage({ params }: JoinPageProps) {
     .single()
 
   if (membership) {
-    // Already in league, take them there
     redirect(`/leagues/${league.id}`)
   }
 
@@ -81,16 +56,16 @@ export default async function JoinLeaguePage({ params }: JoinPageProps) {
     .select('*', { count: 'exact', head: true })
     .eq('league_id', league.id)
 
-  // Direct POST handler action to avoid extra JS if possible
+  // Server Action להצטרפות לליגה
   const handleJoin = async () => {
     'use server'
     const joinSupabase = await createClient()
-    const { data: { user } } = await joinSupabase.auth.getUser()
+    const { data: { user: actionUser } } = await joinSupabase.auth.getUser()
 
-    if (user) {
+    if (actionUser) {
       await joinSupabase.from('league_members').insert({
         league_id: league.id,
-        user_id: user.id,
+        user_id: actionUser.id,
       })
     }
 
@@ -98,7 +73,7 @@ export default async function JoinLeaguePage({ params }: JoinPageProps) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-surface-glow">
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="glass-card p-8 max-w-md w-full text-center space-y-6">
         <div className="w-16 h-16 rounded-full bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center mx-auto">
           <Trophy className="w-8 h-8 text-indigo-400" />
@@ -130,7 +105,7 @@ export default async function JoinLeaguePage({ params }: JoinPageProps) {
         </div>
 
         <form action={handleJoin}>
-          <button type="submit" className="btn-primary w-full py-3.5">
+          <button type="submit" className="btn-primary w-full py-3.5 cursor-pointer">
             <CheckCircle className="w-5 h-5" />
             Accept Invite & Join League
           </button>

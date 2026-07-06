@@ -12,6 +12,18 @@ type DashboardClientProps = {
   initialProfile?: any
 }
 
+function hasRealTeams(match: Match) {
+  const homeTeam = match.home_team?.trim()
+  const awayTeam = match.away_team?.trim()
+
+  return Boolean(
+    homeTeam &&
+    awayTeam &&
+    homeTeam.toLowerCase() !== 'unknown' &&
+    awayTeam.toLowerCase() !== 'unknown'
+  )
+}
+
 export default function DashboardClient({ userId = '', initialProfile }: DashboardClientProps) {
   const router = useRouter()
   const supabase = useMemo(() => createClient(), [])
@@ -56,9 +68,12 @@ export default function DashboardClient({ userId = '', initialProfile }: Dashboa
 
       if (!isMounted) return
 
+      const visibleUpcomingMatches = (upcomingError ? [] : (upcomingMatchesData ?? [])).filter(hasRealTeams)
+      const visibleFinishedMatches = (finishedError ? [] : (finishedMatchesData ?? [])).filter(hasRealTeams)
+
       setProfile(initialProfile ?? null)
-      setUpcomingMatches(upcomingError ? [] : (upcomingMatchesData ?? []))
-      setFinishedMatches(finishedError ? [] : (finishedMatchesData ?? []))
+      setUpcomingMatches(visibleUpcomingMatches)
+      setFinishedMatches(visibleFinishedMatches)
       setPredictions(predictionsData)
       setIsLoading(false)
     }

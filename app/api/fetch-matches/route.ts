@@ -1,6 +1,7 @@
 import { createHash } from 'crypto'
 import { NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@/lib/types/database'
 
 export const dynamic = 'force-dynamic'
 
@@ -161,7 +162,23 @@ export async function GET() {
     const matches = await fetchUpcomingMatches()
     console.log('[fetch-matches] Matches prepared for upsert:', matches.length)
 
-    const supabase = createAdminClient()
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ''
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('[fetch-matches] Missing Supabase credentials for route runtime', {
+        supabaseUrl: Boolean(supabaseUrl),
+        supabaseKey: Boolean(supabaseKey),
+      })
+      return NextResponse.json(
+        { success: false, error: 'Missing Supabase credentials', imported: 0 },
+        { status: 500 }
+      )
+    }
+
+    const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
 
     try {
       const { error } = await supabase.from('matches').upsert(matches as never[], {

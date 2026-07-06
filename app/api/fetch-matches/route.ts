@@ -13,6 +13,7 @@ type FootballDataMatch = {
   id: number
   utcDate: string
   status: string
+  stage?: string | null
   homeTeam: {
     name: string
     crest?: string | null
@@ -38,6 +39,7 @@ type MatchRow = {
   away_team: string
   kickoff_time: string
   status: MatchStatus
+  stage: string | null
   home_team_logo: string
   away_team_logo: string
 }
@@ -66,6 +68,7 @@ function normalizeMatch(match: FootballDataMatch): MatchRow {
     away_team: awayTeam,
     kickoff_time: match.utcDate,
     status: mapStatus(match.status),
+    stage: match.stage ?? null,
     home_team_logo: match.homeTeam?.crest || '',
     away_team_logo: match.awayTeam?.crest || '',
   }

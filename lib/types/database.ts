@@ -50,6 +50,7 @@ export interface Database {
           home_team_logo: string
           away_team_logo: string
           competition: string
+          stage: string | null
           kickoff_time: string
           status: MatchStatus
           home_score: number | null
@@ -64,6 +65,7 @@ export interface Database {
           home_team_logo?: string
           away_team_logo?: string
           competition?: string
+          stage?: string | null
           kickoff_time: string
           status?: MatchStatus
           home_score?: number | null
@@ -77,6 +79,7 @@ export interface Database {
           home_team_logo?: string
           away_team_logo?: string
           competition?: string
+          stage?: string | null
           kickoff_time?: string
           status?: MatchStatus
           home_score?: number | null

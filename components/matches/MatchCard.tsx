@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { Clock, Lock, CheckCircle2, Loader2, Edit2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Match, Prediction } from '@/lib/types/database'
-import { formatMatchDate, isMatchLocked, getPointsLabel, cn } from '@/lib/utils'
+import { formatMatchDate, formatStageLabel, isMatchLocked, getPointsLabel, cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 
 interface MatchCardProps {
@@ -75,6 +75,7 @@ export default function MatchCard({ match, userPrediction, userId }: MatchCardPr
   }
 
   const statusBadge = getStatusBadge()
+  const formattedStage = formatStageLabel(match.stage)
 
   return (
     <div
@@ -85,10 +86,15 @@ export default function MatchCard({ match, userPrediction, userId }: MatchCardPr
       )}
     >
       {/* Competition + Status */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-          {match.competition}
-        </span>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col min-w-0">
+          <span className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+            {match.competition}
+          </span>
+          {formattedStage ? (
+            <span className="text-[11px] text-slate-400 mt-0.5">{formattedStage}</span>
+          ) : null}
+        </div>
         <span className={`badge ${statusBadge.cls}`}>{statusBadge.label}</span>
       </div>
 

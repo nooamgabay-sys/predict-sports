@@ -13,6 +13,23 @@ export function formatMatchDate(dateStr: string): string {
   return format(date, 'EEE dd MMM, HH:mm');
 }
 
+export function formatStageLabel(stage?: string | null): string {
+  if (!stage) return ''
+
+  const normalized = stage.replace(/[_-]+/g, ' ').trim()
+  if (!normalized) return ''
+
+  return normalized
+    .split(/\s+/)
+    .map((part) => {
+      const lower = part.toLowerCase()
+      if (lower === 'of') return 'of'
+      if (/^\d+$/.test(lower)) return lower
+      return lower.charAt(0).toUpperCase() + lower.slice(1)
+    })
+    .join(' ')
+}
+
 export function formatRelativeTime(dateStr: string): string {
   return formatDistanceToNow(new Date(dateStr), { addSuffix: true })
 }

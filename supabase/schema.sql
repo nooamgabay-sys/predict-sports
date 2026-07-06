@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS public.matches (
   home_team_logo  TEXT          DEFAULT '',
   away_team_logo  TEXT          DEFAULT '',
   competition     TEXT          NOT NULL DEFAULT 'Premier League',
+  stage           TEXT,
   match_date      TIMESTAMPTZ   NOT NULL,
   status          match_status  NOT NULL DEFAULT 'upcoming',
   home_score      INTEGER,
